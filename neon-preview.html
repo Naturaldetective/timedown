@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>赛博霓虹倒计时 // CYBER NEON</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      background: #030305;
+      color: #fff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      overflow: hidden;
+    }
+
+    /* 背景层 */
+    .bg {
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse 90% 60% at 50% -10%, rgba(34,211,238,0.18), transparent 55%),
+        radial-gradient(circle at 85% 85%, rgba(168,85,247,0.14), transparent 45%),
+        radial-gradient(circle at 15% 70%, rgba(236,72,153,0.1), transparent 40%),
+        #030305;
+      pointer-events: none;
+    }
+
+    /* 数据流雨 */
+    #rain {
+      position: fixed; inset: 0;
+      z-index: 0; opacity: 0.6;
+      pointer-events: none;
+    }
+
+    /* CRT 扫描线 */
+    .crt {
+      position: fixed; inset: 0;
+      z-index: 5; opacity: 0.035;
+      background: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(255,255,255,0.4) 1px, rgba(255,255,255,0.4) 2px);
+      pointer-events: none;
+    }
+
+    /* 扫描光束 */
+    .scan {
+      position: fixed; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(34,211,238,0.8), transparent);
+      box-shadow: 0 0 30px rgba(34,211,238,0.6);
+      animation: scanDown 5s linear infinite;
+      pointer-events: none; z-index: 20;
+    }
+    .scan2 {
+      position: fixed; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(232,121,249,0.6), transparent);
+      animation: scanUp 7s linear infinite;
+      pointer-events: none; z-index: 20;
+    }
+    @keyframes scanDown { from { top: -2%; } to { top: 102%; } }
+    @keyframes scanUp { from { top: 102%; } to { top: -2%; } }
+
+    /* 浮动粒子 */
+    .particle {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* 六边形 */
+    .hex-wrap {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: none; z-index: 0;
+    }
+    .hex-svg {
+      width: min(120vw, 800px); height: min(120vw, 800px);
+      animation: hexSpin 120s linear infinite;
+    }
+    .hex-svg2 {
+      position: absolute;
+      width: min(100vw, 680px); height: min(100vw, 680px);
+      animation: hexSpin2 90s linear infinite;
+    }
+    @keyframes hexSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes hexSpin2 { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+
+    /* HUD */
+    .hud {
+      position: fixed; top: 12px;
+      font-size: 9px; line-height: 1.6;
+      color: rgba(34,211,238,0.5);
+      z-index: 30; pointer-events: none;
+    }
+    .hud-left { left: 12px; }
+    .hud-right { right: 12px; text-align: right; }
+    .hud .dim { color: rgba(236,72,153,0.5); }
+    .hud .tiny { font-size: 8px; color: rgba(34,211,238,0.3); margin-top: 4px; }
+    .status-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #4ade80;
+      animation: dotPulse 1.5s ease-in-out infinite;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    @keyframes dotPulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* 容器 */
+    .container {
+      position: relative; z-index: 10;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 2rem;
+    }
+
+    /* 标题 */
+    .task-label {
+      font-size: 10px;
+      letter-spacing: 0.4em;
+      color: rgba(103,232,249,0.8);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .task-label::before, .task-label::after {
+      content: '';
+      width: 24px; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(34,211,238,0.6));
+    }
+    .task-label::after {
+      background: linear-gradient(90deg, rgba(34,211,238,0.6), transparent);
+    }
+    .title {
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 3rem;
+      position: relative;
+      display: inline-block;
+      color: #fff;
+    }
+    .title::before, .title::after {
+      content: attr(data-text);
+      position: absolute; left: 0; top: 0;
+      width: 100%; height: 100%;
+    }
+    .title::before {
+      color: rgba(34,211,238,0.8);
+      animation: glitch1 2.5s infinite linear alternate-reverse;
+    }
+    .title::after {
+      color: rgba(232,121,249,0.8);
+      animation: glitch2 3s infinite linear alternate-reverse;
+    }
+    @keyframes glitch1 {
+      0% { clip-path: inset(20% 0 40% 0); transform: translate(3px, -2px); }
+      20% { clip-path: inset(60% 0 10% 0); transform: translate(-2px, 1px); }
+      40% { clip-path: inset(10% 0 70% 0); transform: translate(2px, 3px); }
+      60% { clip-path: inset(80% 0 5% 0); transform: translate(-1px, -2px); }
+      80% { clip-path: inset(30% 0 50% 0); transform: translate(1px, 2px); }
+      100% { clip-path: inset(50% 0 20% 0); transform: translate(-3px, -1px); }
+    }
+    @keyframes glitch2 {
+      0% { clip-path: inset(60% 0 10% 0); transform: translate(-3px, 2px); }
+      25% { clip-path: inset(20% 0 50% 0); transform: translate(2px, -1px); }
+      50% { clip-path: inset(70% 0 15% 0); transform: translate(-1px, 3px); }
+      75% { clip-path: inset(40% 0 30% 0); transform: translate(3px, -2px); }
+      100% { clip-path: inset(10% 0 60% 0); transform: translate(-2px, 1px); }
+    }
+
+    /* 倒计时 */
+    .countdown {
+      display: flex; align-items: flex-end;
+      gap: 0.5rem; margin-bottom: 1.5rem;
+    }
+    @media (min-width: 640px) { .countdown { gap: 0.75rem; } }
+    @media (min-width: 768px) { .countdown { gap: 1rem; } }
+
+    .digit-card { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+    .digit-box {
+      position: relative; overflow: hidden;
+      border: 1px solid rgba(34,211,238,0.5);
+      border-radius: 2px;
+      background: rgba(0,0,0,0.8);
+      padding: 0.75rem 1rem;
+      box-shadow: 0 0 30px rgba(34,211,238,0.2), inset 0 0 30px rgba(34,211,238,0.05);
+    }
+    @media (min-width: 640px) { .digit-box { padding: 1rem 1.25rem; } }
+
+    .digit-box::before {
+      content: '';
+      position: absolute; left: 0; right: 0; top: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #22d3ee, transparent);
+      box-shadow: 0 0 10px rgba(34,211,238,0.8);
+    }
+    .digit-box::after {
+      content: '';
+      position: absolute; left: 0; right: 0; bottom: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #e879f9, transparent);
+      box-shadow: 0 0 10px rgba(232,121,249,0.8);
+    }
+    .digit-box .side-l {
+      position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+      background: linear-gradient(to bottom, rgba(34,211,238,0.6), transparent, rgba(232,121,249,0.6));
+    }
+    .digit-box .side-r {
+      position: absolute; right: 0; top: 0; bottom: 0; width: 2px;
+      background: linear-gradient(to bottom, rgba(232,121,249,0.6), transparent, rgba(34,211,238,0.6));
+    }
+    .digit-box .inner-grid {
+      position: absolute; inset: 0; opacity: 0.04;
+      background-image:
+        linear-gradient(rgba(34,211,238,0.5) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34,211,238,0.5) 1px, transparent 1px);
+      background-size: 8px 8px;
+    }
+    .digit-box .inner-scan {
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(34,211,238,0.08), transparent, rgba(232,121,249,0.08));
+      animation: innerScan 3s linear infinite;
+    }
+    @keyframes innerScan { from { transform: translateY(-100%); } to { transform: translateY(100%); } }
+
+    .digit {
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 15px rgba(34,211,238,0.7);
+      position: relative; z-index: 1;
+    }
+    .corner { position: absolute; width: 8px; height: 8px; }
+    .corner-tl { top: 6px; left: 6px; border-top: 2px solid; border-left: 2px solid; border-color: rgba(34,211,238,0.7); }
+    .corner-tr { top: 6px; right: 6px; border-top: 2px solid; border-right: 2px solid; border-color: rgba(34,211,238,0.7); }
+    .corner-bl { bottom: 6px; left: 6px; border-bottom: 2px solid; border-left: 2px solid; border-color: rgba(232,121,249,0.7); }
+    .corner-br { bottom: 6px; right: 6px; border-bottom: 2px solid; border-right: 2px solid; border-color: rgba(232,121,249,0.7); }
+
+    .label {
+      font-size: 9px; font-weight: bold;
+      letter-spacing: 0.3em;
+      color: rgba(103,232,249,0.7);
+      text-transform: uppercase;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .label::before, .label::after {
+      content: '';
+      width: 12px; height: 1px;
+      background: rgba(34,211,238,0.5);
+    }
+
+    .colon {
+      display: flex; flex-direction: column; gap: 8px;
+      margin-bottom: 2rem;
+      animation: blink 0.8s steps(2) infinite;
+    }
+    .colon div {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+    .colon div:first-child { background: #22d3ee; box-shadow: 0 0 15px rgba(34,211,238,1); }
+    .colon div:last-child { background: #e879f9; box-shadow: 0 0 15px rgba(232,121,249,1); }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+    /* 天数徽章 */
+    .days-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      border: 1px solid rgba(34,211,238,0.4);
+      background: rgba(0,0,0,0.6);
+      padding: 0.5rem 1rem;
+      border-radius: 2px;
+      margin-bottom: 2rem;
+      position: relative;
+      animation: glow 2.5s ease-in-out infinite;
+    }
+    @keyframes glow {
+      0%,100%{ box-shadow: 0 0 15px rgba(34,211,238,0.15); }
+      50%{ box-shadow: 0 0 40px rgba(168,85,247,0.25); }
+    }
+    .days-badge .edge-tl { position: absolute; left: 0; top: 0; width: 16px; height: 2px; background: rgba(34,211,238,0.8); }
+    .days-badge .edge-tr { position: absolute; right: 0; top: 0; width: 16px; height: 2px; background: rgba(232,121,249,0.8); }
+    .days-badge .edge-bl { position: absolute; left: 0; bottom: 0; width: 16px; height: 2px; background: rgba(232,121,249,0.8); }
+    .days-badge .edge-br { position: absolute; right: 0; bottom: 0; width: 16px; height: 2px; background: rgba(34,211,238,0.8); }
+    .days-badge span { color: rgba(103,232,249,0.7); font-size: 10px; }
+    .days-badge strong { font-size: 1.5rem; }
+    .bars { display: flex; align-items: flex-end; gap: 3px; height: 20px; margin-left: 8px; }
+    .bars div {
+      width: 3px;
+      border-radius: 1px;
+      background: linear-gradient(to top, #22d3ee, #a855f7);
+      animation: bar 0.8s ease-in-out infinite;
+    }
+    .bars div:nth-child(1) { animation-delay: 0s; }
+    .bars div:nth-child(2) { animation-delay: 0.08s; }
+    .bars div:nth-child(3) { animation-delay: 0.16s; }
+    .bars div:nth-child(4) { animation-delay: 0.24s; }
+    .bars div:nth-child(5) { animation-delay: 0.32s; }
+    .bars div:nth-child(6) { animation-delay: 0.4s; }
+    @keyframes bar { 0%,100%{height:20%} 50%{height:100%} }
+
+    /* 进度环 */
+    .progress-ring {
+      position: relative;
+      width: min(65vw, 240px);
+      height: min(65vw, 240px);
+    }
+    @media (min-width: 640px) {
+      .progress-ring { width: min(55vw, 280px); height: min(55vw, 280px); }
+    }
+    .progress-ring svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+    .progress-center {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .progress-center .ptext {
+      font-size: 9px; letter-spacing: 0.2em;
+      color: rgba(103,232,249,0.6);
+      text-transform: uppercase;
+    }
+    .progress-center .percent {
+      font-size: 2.2rem; font-weight: 900;
+    }
+
+    /* 跑马灯 */
+    .ticker {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      overflow: hidden;
+      border-top: 1px solid rgba(34,211,238,0.25);
+      background: rgba(0,0,0,0.5);
+      padding: 6px 0;
+      z-index: 20;
+      backdrop-filter: blur(4px);
+    }
+    .ticker-content {
+      display: inline-block;
+      white-space: nowrap;
+      font-size: 9px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: rgba(103,232,249,0.6);
+      animation: ticker 18s linear infinite;
+    }
+    @keyframes ticker { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
+
+    .bottom-neon {
+      position: fixed; bottom: 32px; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(34,211,238,0.5), transparent);
+      box-shadow: 0 0 15px rgba(34,211,238,0.4);
+    }
+
+    /* 外发光 */
+    .outer-glow {
+      position: absolute;
+      width: min(85vw, 480px); height: min(85vw, 480px);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(34,211,238,0.2), rgba(168,85,247,0.15), rgba(236,72,153,0.2), transparent);
+      filter: blur(80px);
+      animation: outerPulse 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes outerPulse {
+      0%,100%{ transform: scale(1) rotate(0deg); opacity: 0.6; }
+      50%{ transform: scale(1.2) rotate(15deg); opacity: 0.9; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg"></div>
+  <canvas id="rain"></canvas>
+  <div class="crt"></div>
+  <div class="scan"></div>
+  <div class="scan2"></div>
+
+  <!-- 六边形 -->
+  <div class="hex-wrap">
+    <svg class="hex-svg" viewBox="0 0 400 400">
+      <polygon points="200,20 360,110 360,290 200,380 40,290 40,110"
+        fill="none" stroke="rgba(34,211,238,0.06)" stroke-width="1" stroke-dasharray="8 12"/>
+    </svg>
+    <svg class="hex-svg2" viewBox="0 0 400 400">
+      <polygon points="200,40 340,120 340,280 200,360 60,280 60,120"
+        fill="none" stroke="rgba(168,85,247,0.05)" stroke-width="1" stroke-dasharray="4 16"/>
+    </svg>
+  </div>
+
+  <!-- 浮动粒子 -->
+  <div id="particles"></div>
+
+  <!-- HUD -->
+  <div class="hud hud-left">
+    <div><span class="status-dot"></span>SYS.TIMEDOWN v2.0.77</div>
+    <div>MODE: NEON_CYBER</div>
+    <div class="dim">STATUS: ACTIVE</div>
+    <div class="tiny">MEM: 2048MB // CPU: 12%</div>
+  </div>
+  <div class="hud hud-right">
+    <div>LAT: 35.6762°N</div>
+    <div>LON: 139.6503°E</div>
+    <div class="dim">TOKYO // 2088</div>
+    <div class="tiny">FREQ: 2.4GHz // PING: 3ms</div>
+  </div>
+
+  <div class="container">
+    <div class="task-label">当前任务 // CURRENT TARGET</div>
+    <h1 class="title" data-text="产品发布会倒计时">产品发布会倒计时</h1>
+
+    <div class="outer-glow"></div>
+
+    <div class="countdown">
+      <div class="digit-card">
+        <div class="digit-box">
+          <div class="side-l"></div><div class="side-r"></div>
+          <div class="inner-grid"></div><div class="inner-scan"></div>
+          <span class="digit" id="h">00</span>
+          <div class="corner corner-tl"></div><div class="corner corner-tr"></div>
+          <div class="corner corner-bl"></div><div class="corner corner-br"></div>
+        </div>
+        <span class="label">时 / HR</span>
+      </div>
+      <div class="colon"><div></div><div></div></div>
+      <div class="digit-card">
+        <div class="digit-box">
+          <div class="side-l"></div><div class="side-r"></div>
+          <div class="inner-grid"></div><div class="inner-scan"></div>
+          <span class="digit" id="m">00</span>
+          <div class="corner corner-tl"></div><div class="corner corner-tr"></div>
+          <div class="corner corner-bl"></div><div class="corner corner-br"></div>
+        </div>
+        <span class="label">分 / MIN</span>
+      </div>
+      <div class="colon"><div></div><div></div></div>
+      <div class="digit-card">
+        <div class="digit-box">
+          <div class="side-l"></div><div class="side-r"></div>
+          <div class="inner-grid"></div><div class="inner-scan"></div>
+          <span class="digit" id="s">00</span>
+          <div class="corner corner-tl"></div><div class="corner corner-tr"></div>
+          <div class="corner corner-bl"></div><div class="corner corner-br"></div>
+        </div>
+        <span class="label">秒 / SEC</span>
+      </div>
+    </div>
+
+    <div class="days-badge">
+      <div class="edge-tl"></div><div class="edge-tr"></div>
+      <div class="edge-bl"></div><div class="edge-br"></div>
+      <span>剩余 / REMAINING</span>
+      <strong id="d">0</strong>
+      <span>天 / DAYS</span>
+      <div class="bars">
+        <div style="height:30%"></div><div style="height:70%"></div>
+        <div style="height:50%"></div><div style="height:90%"></div>
+        <div style="height:40%"></div><div style="height:60%"></div>
+      </div>
+    </div>
+
+    <div class="progress-ring">
+      <svg viewBox="0 0 200 200">
+        <defs>
+          <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#22d3ee"/>
+            <stop offset="50%" stop-color="#a855f7"/>
+            <stop offset="100%" stop-color="#ec4899"/>
+          </linearGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(34,211,238,0.06)" stroke-width="3"/>
+        <circle cx="100" cy="100" r="82" fill="none" stroke="rgba(168,85,247,0.04)" stroke-width="1" stroke-dasharray="2 6"/>
+        <circle class="progress" id="progress" cx="100" cy="100" r="90"
+          fill="none" stroke="url(#neonGrad)" stroke-width="3" stroke-linecap="round"
+          stroke-dasharray="565.49" stroke-dashoffset="0" filter="url(#glow)"/>
+      </svg>
+      <div class="progress-center">
+        <span class="ptext">进度 / PROGRESS</span>
+        <span class="percent" id="pct">100%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-neon"></div>
+  <div class="ticker">
+    <div class="ticker-content">◆ SYSTEM ONLINE ◆ TARGET LOCKED ◆ COUNTDOWN ACTIVE ◆ STAY SHARP ◆ THE FUTURE IS WAITING ◆ NEXUS PROTOCOL v4.2 ◆ ALL SYSTEMS NOMINAL ◆</div>
+  </div>
+
+  <script>
+    // 数据流雨
+    (function() {
+      const canvas = document.getElementById('rain');
+      const ctx = canvas.getContext('2d');
+      const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+      const fontSize = 14;
+      let columns, drops;
+
+      function init() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        columns = Math.floor(canvas.width / fontSize);
+        drops = Array.from({ length: columns }, () => Math.random() * -100);
+      }
+
+      init();
+      window.addEventListener('resize', init);
+
+      function draw() {
+        ctx.fillStyle = 'rgba(3, 3, 5, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.font = fontSize + 'px monospace';
+
+        for (let i = 0; i < drops.length; i++) {
+          const text = chars[Math.floor(Math.random() * chars.length)];
+          ctx.fillStyle = Math.random() > 0.98
+            ? 'rgba(232, 121, 249, 0.3)'
+            : 'rgba(34, 211, 238, 0.12)';
+          ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+          if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+          drops[i]++;
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+
+    // 浮动粒子
+    (function() {
+      const container = document.getElementById('particles');
+      for (let i = 0; i < 30; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        const size = Math.random() * 3 + 1;
+        const x = Math.random() * 100;
+        const y = Math.random() * 100;
+        const dur = Math.random() * 8 + 4;
+        const delay = Math.random() * 5;
+        const color = Math.random() > 0.5 ? 'rgba(34,211,238,0.4)' : 'rgba(168,85,247,0.3)';
+        p.style.cssText = `
+          left:${x}%;top:${y}%;width:${size}px;height:${size}px;
+          background:${color};box-shadow:0 0 ${size*3}px ${color};
+          animation: particleFloat ${dur}s ${delay}s ease-in-out infinite;
+        `;
+        container.appendChild(p);
+      }
+
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes particleFloat {
+          0%,100%{ transform:translateY(0); opacity:0; }
+          50%{ transform:translateY(-40px); opacity:0.8; }
+        }
+      `;
+      document.head.appendChild(style);
+    })();
+
+    // 倒计时逻辑
+    const end = new Date(Date.now() + 2*86400000 + 5*3600000 + 23*60000 + 17000);
+    const maxSeconds = 30 * 86400;
+    const circumference = 2 * Math.PI * 90;
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+
+    function update() {
+      const now = Date.now();
+      const diff = Math.max(0, end - now);
+      const totalSec = Math.floor(diff / 1000);
+      const days = Math.floor(totalSec / 86400);
+      const hours = Math.floor((totalSec % 86400) / 3600);
+      const minutes = Math.floor((totalSec % 3600) / 60);
+      const seconds = totalSec % 60;
+
+      document.getElementById('d').textContent = days;
+      document.getElementById('h').textContent = pad(hours);
+      document.getElementById('m').textContent = pad(minutes);
+      document.getElementById('s').textContent = pad(seconds);
+
+      const progress = Math.min(totalSec / maxSeconds, 1);
+      const pct = Math.round(progress * 100);
+      document.getElementById('pct').textContent = pct + '%';
+      document.getElementById('progress').style.strokeDashoffset = circumference * (1 - progress);
+    }
+
+    update();
+    setInterval(update, 1000);
+  </script>
+</body>
+</html>

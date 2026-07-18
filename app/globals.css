@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --flip-bg: #1a1d24;
+  --flip-card: #2a2f3a;
+  --flip-accent: #3d7cff;
+  --office-border: rgba(255, 255, 255, 0.08);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply antialiased bg-[#0f1115] text-zinc-100;
+}
+
+/* 3D flip card perspective */
+.perspective-flip {
+  perspective: 1200px;
+}
+
+.flip-inner {
+  transform-style: preserve-3d;
+}
+
+@keyframes marry-petals {
+  0% {
+    transform: translateY(-10%) translateX(0) rotate(0deg);
+  }
+  100% {
+    transform: translateY(110%) translateX(-24px) rotate(40deg);
+  }
+}
+
+/* 婚礼主题：无视频时的照片缓慢推拉（Ken Burns） */
+@keyframes marry-kenburns {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  100% {
+    transform: scale(1.1) translate(-1.8%, -1.2%);
+  }
+}
