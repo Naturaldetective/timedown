@@ -122,37 +122,6 @@ function GridFloor() {
   );
 }
 
-/* ── 赛博朋克太阳（落日） ── */
-function CyberSun() {
-  return (
-    <div className="pointer-events-none fixed left-1/2 top-[52vh] z-[1] -translate-x-1/2">
-      <motion.div
-        className="relative h-[min(50vw,320px)] w-[min(50vw,320px)] rounded-full"
-        style={{
-          background:
-            "linear-gradient(to bottom, #f97316 0%, #ec4899 40%, #a855f7 70%, #22d3ee 100%)",
-          boxShadow:
-            "0 0 60px rgba(236,72,153,0.5), 0 0 120px rgba(168,85,247,0.3)",
-        }}
-        animate={{ opacity: [0.85, 1, 0.85] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-      >
-        {/* 镂空条纹 */}
-        <div
-          className="absolute inset-0 rounded-full"
-          style={{
-            background:
-              "repeating-linear-gradient(to bottom, transparent 0px, transparent 8px, #030305 8px, #030305 10px, transparent 10px, transparent 20px, #030305 20px, #030305 24px, transparent 24px, transparent 36px, #030305 36px, #030305 42px)",
-            maskImage: "linear-gradient(to bottom, transparent 35%, black 60%)",
-            WebkitMaskImage:
-              "linear-gradient(to bottom, transparent 35%, black 60%)",
-          }}
-        />
-      </motion.div>
-    </div>
-  );
-}
-
 /* ── 故障文字 ── */
 function GlitchText({ text }: { text: string }) {
   return (
@@ -530,9 +499,6 @@ export function NeonTheme({
 
       {/* 数据流雨 */}
       <DataRain />
-
-      {/* 赛博落日 */}
-      <CyberSun />
 
       {/* 透视网格地面 */}
       <GridFloor />
