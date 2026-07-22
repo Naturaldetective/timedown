@@ -12,7 +12,6 @@ import { buildExportFile, downloadJson, parseImportJson } from "@/lib/config-io"
 import type { CountdownTask, CountdownTheme } from "@/lib/types";
 import { STORAGE_KEY } from "@/lib/types";
 import { getTimeParts } from "@/lib/time";
-import { ClockTheme } from "./ClockTheme";
 import { FireworksOverlay } from "./FireworksOverlay";
 import { FlipTheme } from "./FlipTheme";
 import { MarryTheme } from "./MarryTheme";
@@ -30,7 +29,7 @@ function defaultTasks(): CountdownTask[] {
   return [
     {
       id: newId(),
-      title: "示例：下班倒计时",
+      title: "下班倒计时",
       targetAt: t.toISOString(),
       theme: "flip",
     },
@@ -47,15 +46,13 @@ function loadTasks(): CountdownTask[] {
     return parsed.map((t) => ({
       ...t,
       theme:
-        t.theme === "clock"
-          ? "clock"
-          : t.theme === "ring"
-            ? "ring"
-            : t.theme === "marry"
-              ? "marry"
-              : t.theme === "neon"
-                ? "neon"
-                : "flip",
+        t.theme === "ring"
+          ? "ring"
+          : t.theme === "marry"
+            ? "marry"
+            : t.theme === "neon"
+              ? "neon"
+              : "flip",
     }));
   } catch {
     return defaultTasks();
@@ -210,7 +207,7 @@ export function CountdownApp() {
           }}
           className="rounded-xl bg-sky-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-sky-500"
         >
-          创建示例任务
+          创建任务
         </button>
       </div>
     );
@@ -231,7 +228,7 @@ export function CountdownApp() {
       ) : active.theme === "neon" ? (
         <NeonTheme title={active.title} parts={parts} tickKey={tickKey} />
       ) : (
-        <ClockTheme title={active.title} parts={parts} tickKey={tickKey} />
+        <FlipTheme title={active.title} parts={parts} />
       )}
 
       <FireworksOverlay
@@ -266,17 +263,6 @@ export function CountdownApp() {
               }`}
             >
               翻页
-            </button>
-            <button
-              type="button"
-              onClick={() => setThemeForActive("clock")}
-              className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition sm:px-3 sm:text-sm ${
-                active.theme === "clock"
-                  ? "bg-white text-zinc-900"
-                  : "text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              炫酷时钟
             </button>
             <button
               type="button"
