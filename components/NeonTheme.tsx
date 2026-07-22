@@ -69,16 +69,100 @@ function DataRain() {
   );
 }
 
+/* ── 赛博朋克透视网格地面 ── */
+function GridFloor() {
+  return (
+    <div
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-[2] h-[45vh]"
+      style={{ perspective: "600px", perspectiveOrigin: "50% 0%" }}
+    >
+      {/* 地平线霓虹光 */}
+      <div className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-cyan-400/80 to-transparent shadow-[0_0_40px_rgba(34,211,238,0.8),0_0_80px_rgba(34,211,238,0.4)]" />
+      {/* 地平线光晕 */}
+      <div
+        className="absolute inset-x-0 top-0 h-32"
+        style={{
+          background:
+            "linear-gradient(to bottom, rgba(34,211,238,0.25), rgba(168,85,247,0.1) 50%, transparent)",
+        }}
+      />
+      {/* 透视网格 */}
+      <div
+        className="absolute inset-0"
+        style={{
+          transform: "rotateX(75deg) scale(1.6)",
+          transformOrigin: "50% 0%",
+          backgroundImage:
+            "linear-gradient(rgba(34,211,238,0.35) 2px, transparent 2px), linear-gradient(90deg, rgba(34,211,238,0.35) 2px, transparent 2px)",
+          backgroundSize: "60px 60px",
+          animation: "gridScroll 2s linear infinite",
+          maskImage:
+            "linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, transparent 95%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, transparent 95%)",
+        }}
+      />
+      {/* 品红副网格 */}
+      <div
+        className="absolute inset-0"
+        style={{
+          transform: "rotateX(75deg) scale(1.6)",
+          transformOrigin: "50% 0%",
+          backgroundImage:
+            "linear-gradient(rgba(232,121,249,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(232,121,249,0.2) 1px, transparent 1px)",
+          backgroundSize: "15px 15px",
+          animation: "gridScroll 0.5s linear infinite",
+          maskImage:
+            "linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 80%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 80%)",
+        }}
+      />
+    </div>
+  );
+}
+
+/* ── 赛博朋克太阳（落日） ── */
+function CyberSun() {
+  return (
+    <div className="pointer-events-none fixed left-1/2 top-[52vh] z-[1] -translate-x-1/2">
+      <motion.div
+        className="relative h-[min(50vw,320px)] w-[min(50vw,320px)] rounded-full"
+        style={{
+          background:
+            "linear-gradient(to bottom, #f97316 0%, #ec4899 40%, #a855f7 70%, #22d3ee 100%)",
+          boxShadow:
+            "0 0 60px rgba(236,72,153,0.5), 0 0 120px rgba(168,85,247,0.3)",
+        }}
+        animate={{ opacity: [0.85, 1, 0.85] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+      >
+        {/* 镂空条纹 */}
+        <div
+          className="absolute inset-0 rounded-full"
+          style={{
+            background:
+              "repeating-linear-gradient(to bottom, transparent 0px, transparent 8px, #030305 8px, #030305 10px, transparent 10px, transparent 20px, #030305 20px, #030305 24px, transparent 24px, transparent 36px, #030305 36px, #030305 42px)",
+            maskImage: "linear-gradient(to bottom, transparent 35%, black 60%)",
+            WebkitMaskImage:
+              "linear-gradient(to bottom, transparent 35%, black 60%)",
+          }}
+        />
+      </motion.div>
+    </div>
+  );
+}
+
 /* ── 故障文字 ── */
 function GlitchText({ text }: { text: string }) {
   return (
     <div className="relative inline-block">
-      <span className="relative z-10">{text}</span>
+      {/* RGB 分离层 */}
       <span
-        className="pointer-events-none absolute left-0 top-0 -z-10 text-cyan-400/80"
+        className="pointer-events-none absolute left-0 top-0 z-0"
         style={{
+          color: "rgba(255,0,80,0.85)",
           clipPath: "inset(20% 0 40% 0)",
-          transform: "translate(3px, -2px)",
           animation: "glitch1 2.5s infinite linear alternate-reverse",
         }}
         aria-hidden
@@ -86,10 +170,10 @@ function GlitchText({ text }: { text: string }) {
         {text}
       </span>
       <span
-        className="pointer-events-none absolute left-0 top-0 -z-10 text-fuchsia-400/80"
+        className="pointer-events-none absolute left-0 top-0 z-0"
         style={{
+          color: "rgba(34,211,238,0.85)",
           clipPath: "inset(60% 0 10% 0)",
-          transform: "translate(-3px, 2px)",
           animation: "glitch2 3s infinite linear alternate-reverse",
         }}
         aria-hidden
@@ -97,13 +181,23 @@ function GlitchText({ text }: { text: string }) {
         {text}
       </span>
       <span
-        className="pointer-events-none absolute left-0 top-0 -z-10 text-yellow-400/60"
+        className="pointer-events-none absolute left-0 top-0 z-0"
         style={{
+          color: "rgba(232,121,249,0.7)",
           clipPath: "inset(40% 0 30% 0)",
-          transform: "translate(1px, 1px)",
           animation: "glitch3 2s infinite linear alternate-reverse",
         }}
         aria-hidden
+      >
+        {text}
+      </span>
+      {/* 主体 */}
+      <span
+        className="relative z-10"
+        style={{
+          textShadow:
+            "0 0 8px rgba(255,255,255,0.8), 0 0 20px rgba(34,211,238,0.7), 0 0 40px rgba(232,121,249,0.5)",
+        }}
       >
         {text}
       </span>
@@ -156,10 +250,12 @@ function CyberDigit({ value, label }: { value: string; label: string }) {
           className={`relative z-10 font-mono text-5xl font-black tabular-nums sm:text-7xl md:text-8xl ${
             glitch
               ? "text-fuchsia-300 drop-shadow-[0_0_20px_rgba(232,121,249,0.8)]"
-              : "text-white drop-shadow-[0_0_15px_rgba(34,211,238,0.7)]"
+              : "text-white"
           }`}
           style={{
             transform: glitch ? `translate(${Math.random() * 4 - 2}px, ${Math.random() * 4 - 2}px)` : "none",
+            animation: glitch ? undefined : "rgbShift 6s infinite",
+            textShadow: glitch ? undefined : "0 0 15px rgba(34,211,238,0.7)",
           }}
         >
           {value}
@@ -293,6 +389,57 @@ function HexDecor() {
   );
 }
 
+/* ── 赛博背景图片轮播（淡入淡出） ── */
+const CYBER_IMAGES = [
+  "/cyber/cyber.png",
+  "/cyber/images.jpeg",
+];
+
+function CyberBackground() {
+  const [layers, setLayers] = useState<{ src: string; key: number }[]>([]);
+  const keyRef = useRef(0);
+
+  useEffect(() => {
+    function pickRandom() {
+      const idx = Math.floor(Math.random() * CYBER_IMAGES.length);
+      keyRef.current += 1;
+      return { src: CYBER_IMAGES[idx]!, key: keyRef.current };
+    }
+
+    // 初始化两层，底层和顶层
+    setLayers([pickRandom(), pickRandom()]);
+
+    const interval = setInterval(() => {
+      const newImg = pickRandom();
+      setLayers((prev) => {
+        const [_, top] = prev;
+        return [top!, newImg];
+      });
+    }, 8000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="pointer-events-none fixed inset-0 z-0">
+      {layers.map((layer, i) => (
+        <div
+          key={layer.key}
+          className="absolute inset-0 transition-opacity duration-[2500ms] ease-in-out"
+          style={{
+            opacity: i === layers.length - 1 ? 1 : 0,
+            backgroundImage: `url(${layer.src})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
+      ))}
+      {/* 暗色遮罩，确保内容可读 */}
+      <div className="absolute inset-0 bg-[#030305]/60" />
+    </div>
+  );
+}
+
 export function NeonTheme({
   title,
   parts,
@@ -356,6 +503,24 @@ export function NeonTheme({
           from { transform: translateX(100%); }
           to { transform: translateX(-100%); }
         }
+        @keyframes gridScroll {
+          from { background-position-y: 0; }
+          to { background-position-y: 60px; }
+        }
+        @keyframes crtFlicker {
+          0%, 100% { opacity: 1; }
+          92% { opacity: 1; }
+          93% { opacity: 0.82; }
+          94% { opacity: 1; }
+          96% { opacity: 0.9; }
+          97% { opacity: 1; }
+        }
+        @keyframes rgbShift {
+          0%, 88%, 100% { text-shadow: 0 0 15px rgba(34,211,238,0.7); }
+          90% { text-shadow: -4px 0 rgba(255,0,80,0.9), 4px 0 rgba(34,211,238,0.9), 0 0 15px rgba(34,211,238,0.7); }
+          92% { text-shadow: 3px 0 rgba(255,0,80,0.9), -3px 0 rgba(34,211,238,0.9), 0 0 15px rgba(34,211,238,0.7); }
+          94% { text-shadow: -2px 0 rgba(255,0,80,0.9), 2px 0 rgba(34,211,238,0.9), 0 0 15px rgba(34,211,238,0.7); }
+        }
       `}</style>
 
       {/* 背景层 */}
@@ -369,8 +534,17 @@ export function NeonTheme({
         />
       </div>
 
+      {/* 赛博背景图轮播 */}
+      <CyberBackground />
+
       {/* 数据流雨 */}
       <DataRain />
+
+      {/* 赛博落日 */}
+      <CyberSun />
+
+      {/* 透视网格地面 */}
+      <GridFloor />
 
       {/* 浮动粒子 */}
       <FloatingParticles />
@@ -380,10 +554,20 @@ export function NeonTheme({
 
       {/* CRT 扫描线 */}
       <div
-        className="pointer-events-none fixed inset-0 z-[5] opacity-[0.035]"
+        className="pointer-events-none fixed inset-0 z-[5] opacity-[0.06]"
         style={{
           background:
             "repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(255,255,255,0.4) 1px, rgba(255,255,255,0.4) 2px)",
+        }}
+      />
+
+      {/* 屏幕闪烁 + 暗角 */}
+      <div
+        className="pointer-events-none fixed inset-0 z-[6]"
+        style={{
+          animation: "crtFlicker 4s infinite",
+          background:
+            "radial-gradient(ellipse 80% 70% at 50% 45%, transparent 55%, rgba(0,0,0,0.55) 100%)",
         }}
       />
 

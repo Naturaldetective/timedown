@@ -295,7 +295,7 @@ export function CountdownApp() {
                   : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
-              赛博霓虹
+              赛博
             </button>
           </div>
 
@@ -387,7 +387,7 @@ export function CountdownApp() {
                             : t.theme === "marry"
                               ? "婚礼"
                               : t.theme === "neon"
-                                ? "赛博霓虹"
+                                ? "赛博"
                                 : "时钟"}
                       </span>
                     </div>
@@ -443,7 +443,7 @@ export function CountdownApp() {
                           updateTask(t.id, { theme: "neon" });
                         }}
                       >
-                        主题：赛博霓虹
+                        主题：赛博
                       </button>
                       <button
                         type="button"
