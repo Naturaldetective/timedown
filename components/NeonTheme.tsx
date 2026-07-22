@@ -435,7 +435,7 @@ function CyberBackground() {
         />
       ))}
       {/* 暗色遮罩，确保内容可读 */}
-      <div className="absolute inset-0 bg-[#030305]/60" />
+      <div className="absolute inset-0 bg-[#030305]/40" />
     </div>
   );
 }
@@ -464,15 +464,6 @@ export function NeonTheme({
   useEffect(() => {
     secondSpring.set(parts.seconds);
   }, [parts.seconds, secondSpring]);
-
-  const progress = useMemo(() => {
-    const totalSeconds = parts.days * 86400 + parts.hours * 3600 + parts.minutes * 60 + parts.seconds;
-    const maxSeconds = 30 * 86400;
-    return Math.min(totalSeconds / maxSeconds, 1);
-  }, [parts]);
-
-  const circumference = 2 * Math.PI * 90;
-  const strokeDashoffset = circumference * (1 - progress);
 
   return (
     <div className="relative min-h-[100dvh] overflow-hidden bg-[#030305]">
@@ -567,7 +558,7 @@ export function NeonTheme({
         style={{
           animation: "crtFlicker 4s infinite",
           background:
-            "radial-gradient(ellipse 80% 70% at 50% 45%, transparent 55%, rgba(0,0,0,0.55) 100%)",
+            "radial-gradient(ellipse 80% 70% at 50% 45%, transparent 60%, rgba(0,0,0,0.4) 100%)",
         }}
       />
 
@@ -696,50 +687,6 @@ export function NeonTheme({
                 ))}
               </div>
             </motion.div>
-
-            {/* 进度环 */}
-            <div className="relative mt-3 h-[min(65vw,240px)] w-[min(65vw,240px)] sm:h-[min(55vw,280px)] sm:w-[min(55vw,280px)]">
-              <svg className="h-full w-full -rotate-90" viewBox="0 0 200 200">
-                <defs>
-                  <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#22d3ee" />
-                    <stop offset="50%" stopColor="#a855f7" />
-                    <stop offset="100%" stopColor="#ec4899" />
-                  </linearGradient>
-                  <filter id="glow">
-                    <feGaussianBlur stdDeviation="3" result="blur" />
-                    <feMerge>
-                      <feMergeNode in="blur" />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
-                </defs>
-                <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(34,211,238,0.06)" strokeWidth="3" />
-                <circle cx="100" cy="100" r="82" fill="none" stroke="rgba(168,85,247,0.04)" strokeWidth="1" strokeDasharray="2 6" />
-                <motion.circle
-                  cx="100"
-                  cy="100"
-                  r="90"
-                  fill="none"
-                  stroke="url(#neonGrad)"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeDasharray={circumference}
-                  initial={false}
-                  animate={{ strokeDashoffset }}
-                  transition={{ type: "spring", stiffness: 100, damping: 20 }}
-                  filter="url(#glow)"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-[9px] uppercase tracking-[0.2em] text-cyan-400/60 sm:text-[10px]">
-                  进度 / PROGRESS
-                </span>
-                <span className="font-mono text-3xl font-black text-white sm:text-4xl">
-                  {Math.round((1 - progress) * 100)}%
-                </span>
-              </div>
-            </div>
           </motion.div>
         </motion.div>
       </div>
